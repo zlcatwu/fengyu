@@ -2,26 +2,37 @@
  * Created by uedc on 2021/10/11.
  */
 
-import { computed, defineComponent } from '@vue/composition-api'
+import { computed, defineComponent, toRefs, toRef } from '@vue/composition-api'
 import { TablePublicProps, tableProps } from './types'
 
 export default defineComponent({
   name: 'Table',
   props: tableProps,
   setup(props, { slots }) {
-    const classes = useClasses(props)
-    return () => {
-      return (
-        <p class={classes.value}>Hello World. {slots?.default?.()}</p>
-      )
-    }
+    const columns = props.options.columns;
+    const data = props.data;
+
+    return () => (
+      <table>
+        <thead>
+          <tr>
+            {columns.map(column => <th>
+              {column.header} {column.sortable ? 'sortable' : 'unsortable'}
+            </th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map(row => <tr>
+            {columns.map(col => <td>{row[col.key]}</td>)}
+          </tr>)}
+        </tbody>
+      </table>
+    );
   },
 })
 
 function useClasses (props: TablePublicProps) {
   return computed(() => {
-    return {
-      'test-class': props.test,
-    }
+    return {}
   })
 }

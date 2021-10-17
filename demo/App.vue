@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TestTable :test="test">
+    <TestTable :options="tableOptions" :data="data">
       <span>xxxxxx</span>
     </TestTable>
   </div>
@@ -16,9 +16,22 @@ export default defineComponent({
     TestTable,
   },
   setup() {
-    const test = ref(true)
+    const tableOptions = ref({
+      columns: [
+        { key: 'index', header: 'Index', sortable: false },
+        { key: 'name', header: 'Name', sortable: true }
+      ],
+      pagination: {
+        enable: true
+      }
+    });
+    const data = ref([
+      { index: 1, name: 'xxx' },
+      { index: 2, name: 'yyy' },
+      { index: 3, name: 'zzz' }
+    ]);
 
-    return { test }
+    return { tableOptions, data }
   },
 })
 </script>

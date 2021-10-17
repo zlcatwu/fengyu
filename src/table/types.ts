@@ -26,16 +26,46 @@ export type IxPublicPropTypes<O> = O extends object
   ? { [K in PublicRequiredKeys<O>]: InferPropType<O[K]> } & { [K in PublicOptionalKeys<O>]?: InferPropType<O[K]> }
   : { [K in string]: any }
 
+type IPaginationOptions = {
+  enable: boolean;
+  limit: number;
+}
+
+type IColumnOptions = {
+  key: string;
+  header: string;
+  sortable?: boolean;
+}
+
+type ITableData = {
+  [key: string]: any;
+}
+
+type ITableOptions = {
+  columns: IColumnOptions[];
+  pagination: IPaginationOptions;
+}
 
 // Props 定义在这里
 export const tableProps = {
-  test: {
-    type: Boolean,
-    default: false,
+  options: {
+    type: Object as PropType<ITableOptions>,
+    default: () => ({})
   },
+  data: {
+    type: Array as PropType<Array<ITableData>>,
+    default: () => []
+  }
+}
+
+type ITableRowOptions = {
+  content: string;
+}
+
+export const tableRowProps = {
+  options: {
+    type: Array as PropType<Array<ITableOptions>>
+  }
 }
 
 export type TablePublicProps = IxPublicPropTypes<typeof tableProps>
-
-
-
