@@ -3,5 +3,6 @@
  */
 
 import FyTable from './Table'
+import './Table.less';
 
 export { FyTable }

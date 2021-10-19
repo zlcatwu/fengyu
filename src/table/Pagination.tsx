@@ -7,7 +7,7 @@ import { paginationProps } from './types'
 import './Table.less';
 
 export default defineComponent({
-  name: 'FyTable',
+  name: 'Pagination',
   props: paginationProps,
   setup(props, { emit }) {
     const pageTotal = computed(() => Math.ceil(props.total / props.limit));

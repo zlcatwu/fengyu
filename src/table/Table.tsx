@@ -6,18 +6,18 @@ import { computed, defineComponent } from '@vue/composition-api'
 import { ITableData, SORT_TYPE, tableProps } from './types'
 import TableRow from './TableRow';
 import Pagination from './Pagination';
-import './Table.less';
 
 export default defineComponent({
   name: 'FyTable',
   props: tableProps,
   setup(props, { emit }) {
-    const limit = computed(() => props.options.pagination.limit || 10);
+    const columns = computed(() => props.options.columns || []);
+    const limit = computed(() => props.options.pagination?.limit || 10);
     const page = computed(() => props.value.page || 1);
     const sortKey = computed(() => props.value.sortKey || '');
     const sortType = computed(() => props.value.sortType || SORT_TYPE.NONE);
     const displayData = computed(() => {
-      let data = [...props.value.data];
+      let data = [...(props.value.data || [])];
 
       // sort
       const sortFnMap = {
@@ -29,7 +29,7 @@ export default defineComponent({
       typeof sortFn === 'function' && data.sort(sortFn);
 
       // pagination
-      if (props.options.pagination.enable) {
+      if (props.options.pagination?.enable) {
         data = data.slice((page.value - 1) * limit.value, page.value * limit.value);
       }
 
@@ -57,6 +57,7 @@ export default defineComponent({
       });
     };
     return {
+      columns,
       limit,
       page,
       sortKey,
@@ -76,22 +77,22 @@ export default defineComponent({
           on={{
             'update:sortKey': this.onUpdateSortKey
           }}
-          columns={this.options.columns.map(col => ({
+          columns={this.columns.map(col => ({
             content: col.header,
             sortable: col.sortable,
             dataIndex: col.dataIndex
           }))}
           ></TableRow>
         {this.displayData.map(item =>
-          <TableRow columns={this.options.columns.map(col => ({
+          <TableRow columns={this.columns.map(col => ({
             content: item[col.dataIndex],
             dataIndex: col.dataIndex
           }))} />)}
       </table>
-      {this.options.pagination.enable && <Pagination
+      {this.options.pagination?.enable && <Pagination
         page={this.page}
         limit={this.limit}
-        total={this.value.data.length}
+        total={this.value.data?.length}
         on={{
           'update:page': this.onUpdatePage
         }}

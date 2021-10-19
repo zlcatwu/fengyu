@@ -42,6 +42,7 @@ module.exports = {
   moduleNameMapper: {
     '^@tests': '<rootDir>/tests',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    "\\.(css|less)$": "<rootDir>/src/__mocks__/styleMock.js"
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
   collectCoverage: true,
