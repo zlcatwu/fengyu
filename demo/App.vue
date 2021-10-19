@@ -1,37 +1,53 @@
 <template>
   <div>
-    <TestTable :options="tableOptions" :data="data">
-      <span>xxxxxx</span>
-    </TestTable>
+    <fy-table v-model="data" :options="tableOptions" />
   </div>
 </template>
 
 <script lang="ts">
-import { TestTable } from '../src/table'
-import { defineComponent, ref } from '@vue/composition-api'
+import { FyTable } from '../src/table'
+import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'App',
   components: {
-    TestTable,
+    FyTable
   },
-  setup() {
-    const tableOptions = ref({
-      columns: [
-        { key: 'index', header: 'Index', sortable: false },
-        { key: 'name', header: 'Name', sortable: true }
-      ],
-      pagination: {
-        enable: true
+  data() {
+    return {
+      tableOptions: {
+        columns: [
+          { dataIndex: 'index', header: 'Index', sortable: false },
+          { dataIndex: 'name', header: 'Name', sortable: true },
+          { dataIndex: 'level', header: 'Level', sortable: true }
+        ],
+        pagination: {
+          enable: true,
+          limit: 5
+        }
+      },
+      data: {
+        data: [
+          { index: 1, name: 'xxx', level: 1 },
+          { index: 2, name: 'yyy', level: 3 },
+          { index: 3, name: 'zzz', level: 2 },
+          { index: 4, name: 'weq', level: 2 },
+          { index: 5, name: 'zzsadaz', level: 4 },
+          { index: 6, name: 'cx', level: 2 },
+          { index: 7, name: 'zzsdz', level: 7 },
+          { index: 8, name: 'zzxzczxcz', level: 2 }
+        ],
+        page: 1
       }
-    });
-    const data = ref([
-      { index: 1, name: 'xxx' },
-      { index: 2, name: 'yyy' },
-      { index: 3, name: 'zzz' }
-    ]);
-
-    return { tableOptions, data }
+    };
   },
+  mounted() {
+    // setTimeout(() => {
+    //   this.data.page = 1;
+    //   this.data.data = [
+    //     { index: 1, name: 'yyyyy', level: 4 }
+    //   ];
+    // }, 1000);
+  }
 })
 </script>

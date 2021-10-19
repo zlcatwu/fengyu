@@ -1,0 +1,47 @@
+.fy-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fy-table-cell {
+  border: 1px solid #ddd;
+  padding: 8px;
+
+  &_sortable {
+    &::after {
+      content: '↑↓';
+      display: inline-block;
+      width: 20px;
+      margin-left: 16px;
+    }
+
+    &_desc::after,
+    &_asc::after {
+      color: red;
+    }
+
+    &_desc::after {
+      content: '↓';
+    }
+
+    &_asc::after {
+      content: '↑';
+    }
+  }
+}
+
+.fy-table-pagination {
+  margin-top: 12px;
+  text-align: center;
+
+  &__prev,
+  &__next {
+    color: blue;
+    cursor: pointer;
+  }
+
+  &__next,
+  &__page {
+    margin-left: 12px;
+  }
+}
