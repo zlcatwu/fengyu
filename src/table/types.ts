@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { VNode } from 'vue'
 import type { PropOptions, PropType } from 'vue-types/dist/types'
 type Prop<T, D = T> = PropOptions<T, D> | PropType<T>
 type PublicRequiredKeys<T> = {
@@ -26,114 +27,71 @@ export type IxPublicPropTypes<O> = O extends object
   ? { [K in PublicRequiredKeys<O>]: InferPropType<O[K]> } & { [K in PublicOptionalKeys<O>]?: InferPropType<O[K]> }
   : { [K in string]: any }
 
-type IPaginationOptions = {
-  enable: boolean;
-  limit: number;
-}
-
-type IColumnOptions = {
-  dataIndex: string;
-  header: string;
-  sortable?: boolean;
-}
-
-export type ITableData = {
-  [key: string]: any;
-}
-
-type ITableOptions = {
-  columns: IColumnOptions[];
-  pagination: IPaginationOptions;
-}
-
 export enum SORT_TYPE {
   NONE,
   ASC,
   DESC
 }
 
-type ITableValue = {
-  data: ITableData[];
+export enum SELECT_TYPE {
+  NONE,
+  MULTI,
+  SINGLE
+}
+
+type ITableData = {
+  [key: string]: any;
+}
+
+type ITableOptions = {
+  selectType: SELECT_TYPE,
+  selectRenderFn: (record: ITableData) => VNode | void
+}
+
+type IPaginationOptions = {
+  enable: boolean;
+  limit: number;
   page: number;
+  total: number;
+  remote: boolean;
+}
+
+type ISortOptions = {
   sortKey: string;
   sortType: SORT_TYPE;
+  sortFn: (ra: ITableData, rb: ITableData) => number;
+  remote: boolean;
+}
+
+type IColumnOptions = {
+  header: string;
+  dataIndex: string;
+  visible: boolean;
+  sortable: boolean;
 }
 
 // Props 定义在这里
 export const tableProps = {
+  data: {
+    type: Array as PropType<Array<ITableData>>,
+    default: () => []
+  },
   options: {
     type: Object as PropType<ITableOptions>,
     default: () => ({})
   },
-  value: {
-    type: Object as PropType<ITableValue>,
+  paginationOptions: {
+    type: Object as PropType<IPaginationOptions>,
     default: () => ({})
-  }
-}
-
-export const paginationProps = {
-  page: {
-    type: Number,
-    default: 1
   },
-  total: {
-    type: Number,
-    default: 0
+  sortOptions: {
+    type: Object as PropType<ISortOptions>,
+    default: () => ({})
   },
-  limit: {
-    type: Number,
-    default: 10
-  }
-}
-
-export const tableHeadCellProps = {
-  sortable: {
-    type: Boolean,
-    default: false
-  },
-  sortType: {
-    type: Number,
-    default: SORT_TYPE.NONE
-  },
-  content: {
-    type: null,
-    default: ''
-  },
-  dataIndex: {
-    type: String
-  }
-}
-export type TableHeadCellProps = IxPublicPropTypes<typeof tableHeadCellProps>;
-
-export const tableCellProps = {
-  content: {
-    type: null,
-    default: ''
-  },
-  dataIndex: {
-    type: String
-  }
-}
-export type TableCellProps = IxPublicPropTypes<typeof tableCellProps>;
-
-export const tableRowProps = {
   columns: {
-    type: Array as PropType<Array<TableCellProps>>,
+    type: Array as PropType<Array<IColumnOptions>>,
     default: () => []
-  },
-  sortKey: {
-    type: String,
-    default: ''
-  },
-  sortType: {
-    type: Number,
-    default: SORT_TYPE.NONE
-  },
-  isHead: {
-    type: Boolean,
-    default: false
   }
 }
-export type TableRowProps = IxPublicPropTypes<typeof tableRowProps>;
 
 export type TablePublicProps = IxPublicPropTypes<typeof tableProps>

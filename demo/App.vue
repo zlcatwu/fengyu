@@ -1,12 +1,50 @@
 <template>
   <div>
-    <fy-table v-model="data" :options="tableOptions" />
+    <fy-table
+      :data="options1.data"
+      :options.sync="options1.options"
+      :columns.sync="options1.columns"
+      :sortOptions.sync="options1.sortOptions"
+      :paginationOptions.sync="options1.paginationOptions"
+      @cell:click="onCellClick"
+      @cell:hover="onCellHover"
+      @row:click="onRowClick"
+      @row:hover="onRowHover"
+      @row:select="onRowSelect"
+      @pagination:change="onPaginationChange"
+      @sort:change="onSortChange"
+      @columns:visible-change="onColumnsVisibleChange"
+    />
+
+    <fy-table
+      :data="options2.data"
+      :columns.sync="options2.columns"
+      :sortOptions.sync="options2.sortOptions"
+      :paginationOptions.sync="options2.paginationOptions"
+      @cell:click="onCellClick"
+      @cell:hover="onCellHover"
+      @row:click="onRowClick"
+      @row:hover="onRowHover"
+      @row:select="onRowSelect"
+      @pagination:change="onPaginationChange"
+      @sort:change="onSortChange"
+      @columns:visible-change="onColumnsVisibleChange"
+    >
+      <fy-table-column slot="name" :slot-scope="scope">
+        {{ scope.record.name }}
+      </fy-table-column>
+      <fy-table-column slot="header__name">
+        Name!!!
+      </fy-table-column>
+    </fy-table>
   </div>
 </template>
 
 <script lang="ts">
 import { FyTable } from '../src/table'
 import { defineComponent } from '@vue/composition-api'
+import { SORT_TYPE, SELECT_TYPE } from 'src/table/types copy';
+import { ITableData } from 'src/table/types';
 
 export default defineComponent({
   name: 'App',
@@ -15,39 +53,67 @@ export default defineComponent({
   },
   data() {
     return {
-      tableOptions: {
-        columns: [
-          { dataIndex: 'index', header: 'Index', sortable: false },
-          { dataIndex: 'name', header: 'Name', sortable: true },
-          { dataIndex: 'level', header: 'Level', sortable: true }
+      tableOptions1: {
+        data: [
+          { name: 'xxx', account: 'xxx' },
+          { name: 'yyy', account: 'yyy' },
+          { name: 'zzz', account: 'zzz' }
         ],
-        pagination: {
-          enable: true,
-          limit: 5
+        columns: [
+          { header: 'Name', dataIndex: 'name', visible: true },
+          { header: 'Account', dataIndex: 'account', visible: true, sortable: true }
+        ],
+        sortOptions: {
+          sortKey: '',
+          sortType: SORT_TYPE.NONE
+        },
+        paginationOptions: {
+          limit: 10,
+          page: 1
+        },
+        options: {
+          selectType: SELECT_TYPE.MULTI
         }
       },
-      data: {
+      tableOptions2: {
         data: [
-          { index: 1, name: 'xxx', level: 1 },
-          { index: 2, name: 'yyy', level: 3 },
-          { index: 3, name: 'zzz', level: 2 },
-          { index: 4, name: 'weq', level: 2 },
-          { index: 5, name: 'zzsadaz', level: 4 },
-          { index: 6, name: 'cx', level: 2 },
-          { index: 7, name: 'zzsdz', level: 7 },
-          { index: 8, name: 'zzxzczxcz', level: 2 }
+          { name: 'xxx', account: 'xxx' },
+          { name: 'yyy', account: 'yyy' },
+          { name: 'zzz', account: 'zzz' }
         ],
-        page: 1
-      }
+        columns: [
+          { header: 'Name', dataIndex: 'name', visible: true },
+          { header: 'Account', dataIndex: 'account', visible: true, sortable: true }
+        ],
+        sortOptions: {
+          sortKey: '',
+          sortType: SORT_TYPE.NONE,
+          remote: true
+        },
+        paginationOptions: {
+          limit: 10,
+          page: 1,
+          total: 15,
+          remote: true
+        },
+        options: {
+          selectType: SELECT_TYPE.MULTI,
+          selectRenderFn: (record: ITableData) => record.account === 'xxx' ? '-' : undefined
+        }
+      },
     };
   },
+  methods: {
+    onCellClick() {},
+    onCellHover() {},
+    onRowClick() {},
+    onRowHover() {},
+    onRowSelect() {},
+    onPaginationChange() {},
+    onSortChange() {},
+    onColumnsVisibleChange() {}
+  },
   mounted() {
-    // setTimeout(() => {
-    //   this.data.page = 1;
-    //   this.data.data = [
-    //     { index: 1, name: 'yyyyy', level: 4 }
-    //   ];
-    // }, 1000);
   }
 })
 </script>
