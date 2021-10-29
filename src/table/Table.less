@@ -1,18 +1,20 @@
-.fy-table {
+.fy-table__table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.fy-table-cell {
+.fy-table__body-column,
+.fy-table__header-column {
   border: 1px solid #ddd;
   padding: 8px;
 
-  &_sortable {
+  &_sortable,
+  &_sortable_asc,
+  &_sortable_desc {
     &::after {
+      position: absolute;
+      right: 16px;
       content: '↑↓';
-      display: inline-block;
-      width: 20px;
-      margin-left: 16px;
     }
 
     &_desc::after,
@@ -27,21 +29,5 @@
     &_asc::after {
       content: '↑';
     }
-  }
-}
-
-.fy-table-pagination {
-  margin-top: 12px;
-  text-align: center;
-
-  &__prev,
-  &__next {
-    color: blue;
-    cursor: pointer;
-  }
-
-  &__next,
-  &__page {
-    margin-left: 12px;
   }
 }

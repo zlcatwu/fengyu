@@ -1,26 +1,12 @@
 <template>
   <div>
     <fy-table
-      :data="options1.data"
-      :options.sync="options1.options"
-      :columns.sync="options1.columns"
-      :sortOptions.sync="options1.sortOptions"
-      :paginationOptions.sync="options1.paginationOptions"
-      @cell:click="onCellClick"
-      @cell:hover="onCellHover"
-      @row:click="onRowClick"
-      @row:hover="onRowHover"
-      @row:select="onRowSelect"
-      @pagination:change="onPaginationChange"
-      @sort:change="onSortChange"
-      @columns:visible-change="onColumnsVisibleChange"
-    />
-
-    <fy-table
-      :data="options2.data"
-      :columns.sync="options2.columns"
-      :sortOptions.sync="options2.sortOptions"
-      :paginationOptions.sync="options2.paginationOptions"
+      :data="tableOptions1.data"
+      :columns.sync="tableOptions1.columns"
+      :sortOptions.sync="tableOptions1.sortOptions"
+      :paginationOptions.sync="tableOptions1.paginationOptions"
+      :selectOptions.sync="tableOptions1.selectOptions"
+      @update:sortOptions="onUpdate"
       @cell:click="onCellClick"
       @cell:hover="onCellHover"
       @row:click="onRowClick"
@@ -30,12 +16,14 @@
       @sort:change="onSortChange"
       @columns:visible-change="onColumnsVisibleChange"
     >
-      <fy-table-column slot="name" :slot-scope="scope">
-        {{ scope.record.name }}
-      </fy-table-column>
-      <fy-table-column slot="header__name">
-        Name!!!
-      </fy-table-column>
+      <div slot="header__name">
+        NAME
+      </div>
+
+      <div slot="body__account" slot-scope="scope">
+        {{ scope.data.name + ' ' + scope.data.account }}
+      </div>
+
     </fy-table>
   </div>
 </template>
@@ -43,8 +31,7 @@
 <script lang="ts">
 import { FyTable } from '../src/table'
 import { defineComponent } from '@vue/composition-api'
-import { SORT_TYPE, SELECT_TYPE } from 'src/table/types copy';
-import { ITableData } from 'src/table/types';
+import { SORT_TYPE, SELECT_TYPE, ITableData, ISortOptions } from '../src/table/types';
 
 export default defineComponent({
   name: 'App',
@@ -55,9 +42,10 @@ export default defineComponent({
     return {
       tableOptions1: {
         data: [
-          { name: 'xxx', account: 'xxx' },
-          { name: 'yyy', account: 'yyy' },
-          { name: 'zzz', account: 'zzz' }
+          { name: 'name-1', account: 'account-1' },
+          { name: 'name-2', account: 'account-2' },
+          { name: 'name-3', account: 'account-3' },
+          { name: 'name-4', account: 'account-4' }
         ],
         columns: [
           { header: 'Name', dataIndex: 'name', visible: true },
@@ -68,39 +56,24 @@ export default defineComponent({
           sortType: SORT_TYPE.NONE
         },
         paginationOptions: {
-          limit: 10,
+          enable: true,
+          limit: 2,
           page: 1
         },
-        options: {
-          selectType: SELECT_TYPE.MULTI
-        }
-      },
-      tableOptions2: {
-        data: [
-          { name: 'xxx', account: 'xxx' },
-          { name: 'yyy', account: 'yyy' },
-          { name: 'zzz', account: 'zzz' }
-        ],
-        columns: [
-          { header: 'Name', dataIndex: 'name', visible: true },
-          { header: 'Account', dataIndex: 'account', visible: true, sortable: true }
-        ],
-        sortOptions: {
-          sortKey: '',
-          sortType: SORT_TYPE.NONE,
-          remote: true
-        },
-        paginationOptions: {
-          limit: 10,
-          page: 1,
-          total: 15,
-          remote: true
-        },
-        options: {
-          selectType: SELECT_TYPE.MULTI,
-          selectRenderFn: (record: ITableData) => record.account === 'xxx' ? '-' : undefined
-        }
-      },
+        // selectOptions: {
+        //   selectType: SELECT_TYPE.MULTI,
+        //   selected: [],
+        //   idProperty: 'account',
+        //   selectRenderFn: (record: ITableData, idx: number) => record.name === 'xxx' ? '-' : undefined,
+        //   onBeforeSelect: (record: ITableData, idx: number) => {
+        //     if (record.account === 'boss') {
+        //       alert('how dare you');
+        //       return false;
+        //     }
+        //     return true;
+        //   }
+        // }
+      }
     };
   },
   methods: {
@@ -111,7 +84,9 @@ export default defineComponent({
     onRowSelect() {},
     onPaginationChange() {},
     onSortChange() {},
-    onColumnsVisibleChange() {}
+    onColumnsVisibleChange() {},
+    onUpdate(value: ISortOptions) {
+    }
   },
   mounted() {
   }

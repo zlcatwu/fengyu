@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table render 1`] = `
+"<div class=\\"fy-table\\">
+  <table class=\\"fy-table__table\\">
+    <thead>
+      <tr class=\\"fy-table__header-row\\"></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>"
+`;

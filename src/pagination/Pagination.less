@@ -1,0 +1,20 @@
+.fy-pagination {
+  margin-top: 12px;
+  text-align: center;
+
+  &__prev,
+  &__next {
+    color: blue;
+    cursor: pointer;
+
+    &.disabled {
+      cursor: unset;
+      color: grey;
+    }
+  }
+
+  &__next,
+  &__page {
+    margin-left: 12px;
+  }
+}

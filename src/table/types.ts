@@ -28,46 +28,51 @@ export type IxPublicPropTypes<O> = O extends object
   : { [K in string]: any }
 
 export enum SORT_TYPE {
-  NONE,
-  ASC,
-  DESC
+  NONE = 'NONE',
+  ASC = 'ASC',
+  DESC = 'DESC'
 }
 
 export enum SELECT_TYPE {
-  NONE,
-  MULTI,
-  SINGLE
+  NONE = 'NONE',
+  MULTI = 'MULTI',
+  SINGLE = 'SINGLE'
 }
 
-type ITableData = {
+export type ITableData = {
   [key: string]: any;
 }
 
-type ITableOptions = {
-  selectType: SELECT_TYPE,
-  selectRenderFn: (record: ITableData) => VNode | void
-}
+export type Slot = (...args: any[]) => VNode[]
 
-type IPaginationOptions = {
-  enable: boolean;
-  limit: number;
-  page: number;
-  total: number;
-  remote: boolean;
-}
+export type Slots = {
+  [key: string]: Slot | undefined
+};
 
-type ISortOptions = {
+// type ITableOptions = {
+// }
+
+// export type ISelectOptions = {
+//   idProperty: string;
+//   selected: Array<String | Number>;
+//   selectType: SELECT_TYPE;
+//   onBeforeSelect?: () => boolean;
+//   renderFn?: () => VNode | void;
+// }
+
+export type ISortOptions = {
   sortKey: string;
   sortType: SORT_TYPE;
-  sortFn: (ra: ITableData, rb: ITableData) => number;
   remote: boolean;
 }
 
-type IColumnOptions = {
+export type IColumnOptions = {
   header: string;
   dataIndex: string;
-  visible: boolean;
-  sortable: boolean;
+  // visible?: boolean;
+  sortable?: boolean;
+  sortFn: (ra: ITableData, rb: ITableData) => number;
+  slot?: ITableHeaderSlot & ITableContentSlot;
 }
 
 // Props 定义在这里
@@ -76,12 +81,16 @@ export const tableProps = {
     type: Array as PropType<Array<ITableData>>,
     default: () => []
   },
-  options: {
-    type: Object as PropType<ITableOptions>,
-    default: () => ({})
-  },
+  // options: {
+  //   type: Object as PropType<ITableOptions>,
+  //   default: () => ({})
+  // },
+  // selectOptions: {
+  //   type: Object as PropType<ISelectOptions>,
+  //   default: () => ({})
+  // },
   paginationOptions: {
-    type: Object as PropType<IPaginationOptions>,
+    type: Object as PropType<ITablePaginationOptions>,
     default: () => ({})
   },
   sortOptions: {
@@ -93,5 +102,67 @@ export const tableProps = {
     default: () => []
   }
 }
+
+export const tableHeaderProps = {
+  columns: {
+    type: Array as PropType<Array<IColumnOptions>>,
+    default: () => []
+  },
+  sortOptions: {
+    type: Object as PropType<ISortOptions>,
+    default: () => ({})
+  }
+}
+
+export const tableBodyProps = {
+  columns: {
+    type: Array as PropType<Array<IColumnOptions>>,
+    default: () => []
+  },
+  data: {
+    type: Array as PropType<Array<ITableData>>,
+    default: () => []
+  }
+}
+
+export const tableBodyCellProps = {
+  column: {
+    type: Object as PropType<IColumnOptions>,
+    default: () => ({})
+  },
+  data: {
+    type: Object as PropType<ITableData>,
+    default: () => ({})
+  }
+}
+
+export const tableHeaderCellProps = {
+  column: {
+    type: Object as PropType<IColumnOptions>,
+    default: () => ({})
+  },
+  sortOptions: {
+    type: Object as PropType<ISortOptions>,
+    default: () => ({})
+  }
+}
+
+// 表格的分页需要关注 enbale 与 remote，但分页器组件不需要关注
+export type ITablePaginationOptions = {
+  enable: boolean;
+  limit: number;
+  page: number;
+  total: number;
+  remote?: boolean;
+}
+
+export type ITableHeaderSlot = (options: {
+  value: any,
+  data: IColumnOptions
+}) => VNode;
+export type ITableContentSlot = (options: {
+  value: any,
+  data: ITableData
+}) => VNode;
 
 export type TablePublicProps = IxPublicPropTypes<typeof tableProps>
