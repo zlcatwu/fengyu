@@ -33,11 +33,11 @@ export enum SORT_TYPE {
   DESC = 'DESC'
 }
 
-export enum SELECT_TYPE {
-  NONE = 'NONE',
-  MULTI = 'MULTI',
-  SINGLE = 'SINGLE'
-}
+// export enum SELECT_TYPE {
+//   NONE = 'NONE',
+//   MULTI = 'MULTI',
+//   SINGLE = 'SINGLE'
+// }
 
 export type ITableData = {
   [key: string]: any;
