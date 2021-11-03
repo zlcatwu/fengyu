@@ -6,7 +6,7 @@ import { defineComponent, computed } from '@vue/composition-api'
 import {
   tableProps, Slots, IColumnOptions,
   ISortOptions, ITablePaginationOptions,
-  ITableData, SORT_TYPE
+  ITableData, SORT_TYPE, IRowClickEvent, ICellClickEvent
 } from './types'
 import TableHeader from './TableHeader';
 import TableBody from './TableBody';
@@ -27,6 +27,7 @@ export default defineComponent({
         module: 'Table'
       });
       emit('update:sortOptions', sortOptions);
+      emit('sort:change', sortOptions);
     };
     const onPageChange = (page: number) => {
       const opt = {
@@ -38,6 +39,7 @@ export default defineComponent({
         module: 'Table'
       });
       emit('update:paginationOptions', opt);
+      emit('pagination:change', opt);
     };
     return {
       headerColumns,
@@ -57,14 +59,20 @@ export default defineComponent({
           }}
           columns={this.headerColumns}
           sortOptions={this.sortOptions} />
-        <TableBody columns={this.bodyColumns} data={this.displayedData} />
+        <TableBody
+          on={{
+            'row:click': (data: IRowClickEvent) => this.$emit('row:click', data),
+            'cell:click': (data: ICellClickEvent) => this.$emit('cell:click', data)
+          }}
+          columns={this.bodyColumns}
+          data={this.displayedData} />
       </table>
       {this.paginationOptions.enable && <Pagination
         limit={this.paginationOptions.limit}
         page={this.paginationOptions.page}
         total={this.total}
         on={{
-          'update:page': this.onPageChange
+          'update:page': this.onPageChange,
         }}
       />}
     </div>;
@@ -138,17 +146,17 @@ function useColumns (columns: IColumnOptions[], slots: Slots) {
   const headerColumns = (columns?.map(column => ({
     ...column,
     slot: slots[`header__${column.dataIndex}`]
-  })) || []) as IColumnOptions[];
+  }))) as IColumnOptions[];
   const bodyColumns = (columns?.map(column => ({
     ...column,
     slot: slots[`body__${column.dataIndex}`]
-  })) || []) as IColumnOptions[];
+  }))) as IColumnOptions[];
 
   return {
     headerColumns,
     bodyColumns
   };
-};
+}
 
 function usePagination (paginationOptions: ITablePaginationOptions, data: ITableData[]) {
   // 远端分页的话 total 由外部传入，本地分页的话 total = data.length

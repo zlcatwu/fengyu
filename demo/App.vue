@@ -6,15 +6,10 @@
       :sortOptions.sync="tableOptions1.sortOptions"
       :paginationOptions.sync="tableOptions1.paginationOptions"
       :selectOptions.sync="tableOptions1.selectOptions"
-      @update:sortOptions="onUpdate"
       @cell:click="onCellClick"
-      @cell:hover="onCellHover"
       @row:click="onRowClick"
-      @row:hover="onRowHover"
-      @row:select="onRowSelect"
       @pagination:change="onPaginationChange"
       @sort:change="onSortChange"
-      @columns:visible-change="onColumnsVisibleChange"
     >
       <div slot="header__name">
         NAME
@@ -31,7 +26,7 @@
 <script lang="ts">
 import { FyTable } from '../src/table'
 import { defineComponent } from '@vue/composition-api'
-import { SORT_TYPE, SELECT_TYPE, ITableData, ISortOptions } from '../src/table/types';
+import { ICellClickEvent, IRowClickEvent, SORT_TYPE } from '../src/table/types';
 
 export default defineComponent({
   name: 'App',
@@ -77,16 +72,14 @@ export default defineComponent({
     };
   },
   methods: {
-    onCellClick() {},
-    onCellHover() {},
-    onRowClick() {},
-    onRowHover() {},
-    onRowSelect() {},
+    onCellClick(data: ICellClickEvent) {
+      console.log('cell:click', data);
+    },
+    onRowClick(data: IRowClickEvent) {
+      console.log('row:click', data);
+    },
     onPaginationChange() {},
-    onSortChange() {},
-    onColumnsVisibleChange() {},
-    onUpdate(value: ISortOptions) {
-    }
+    onSortChange() {}
   },
   mounted() {
   }

@@ -12,9 +12,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const { nextType, sortCls } = useSortStates(props);
     const onSortChange = () => {
-      if (!props.column.sortable) {
-          return;
-      }
       const nextSortOptions: ISortOptions = {
           sortType: nextType.value,
           sortKey: props.column.dataIndex,
@@ -26,20 +23,24 @@ export default defineComponent({
       });
       emit('update:sortOptions', nextSortOptions);
     };
+    const onClick = () => emit('cell:click');
     return {
       onSortChange,
-      sortCls
+      sortCls,
+      onClick
     };
   },
   render() {
-    return <th onClick={() => this.onSortChange()} class="fy-table__header-column">
+    return <th onClick={this.onClick} class="fy-table__header-column">
       <span class="fy-table__header-column__value">
         {this.column.slot ? this.column.slot({
           value: this.column.header,
           data: this.column
         }) : this.column.header}
       </span>
-      {this.column.sortable && <span class={this.sortCls}></span>}
+      {this.column.sortable && <span
+        onClick={() => this.onSortChange() }
+        class={this.sortCls} />}
     </th>
   }
 })
@@ -49,7 +50,7 @@ function useSortStates(options: {
   sortOptions: ISortOptions
 }) {
   const sortClsMap = {
-      [SORT_TYPE.NONE]: 'fy-table__header-column_sortable',
+      [SORT_TYPE.NONE]: '',
       [SORT_TYPE.ASC]: 'fy-table__header-column_sortable_asc',
       [SORT_TYPE.DESC]: 'fy-table__header-column_sortable_desc',
   };
@@ -60,7 +61,10 @@ function useSortStates(options: {
   };
   const curType = computed(() => options.column.dataIndex === options.sortOptions.sortKey ? options.sortOptions.sortType : SORT_TYPE.NONE);
   const nextType = computed(() => nextSortTypeMap[curType.value]);
-  const sortCls = computed(() => sortClsMap[options.column.dataIndex === options.sortOptions.sortKey ? options.sortOptions.sortType : SORT_TYPE.NONE]);
+  const sortCls = computed(() => [
+    'fy-table__header-column_sortable',
+    sortClsMap[options.column.dataIndex === options.sortOptions.sortKey ? options.sortOptions.sortType : SORT_TYPE.NONE]
+  ].join(' '));
   return {
       sortCls,
       nextType

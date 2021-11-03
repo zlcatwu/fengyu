@@ -5,6 +5,9 @@ import TableHeaderCell from '../table/TableHeaderCell'
 import { SORT_TYPE } from '../table/types'
 import Pagination from '../pagination/Pagination'
 
+const SORTABLE_CLASS = 'fy-table__header-column_sortable';
+const NEXT_CLASS = 'fy-pagination__next';
+
 describe('Table', () => {
   const TableMount = options => mount(FyTable, options)
 
@@ -17,7 +20,7 @@ describe('Table', () => {
     }).not.toThrow()
   })
 
-  test('options with sample columns and data', () => {
+  test('options with simple columns and data', () => {
     const wrapper = TableMount({
       propsData: {
         columns: [
@@ -36,158 +39,6 @@ describe('Table', () => {
     expect(wrapper.findAllComponents(TableBodyCell).at(1).html().includes('account-1')).toBeTruthy();
     expect(wrapper.findAllComponents(TableBodyCell).at(2).html().includes('name-2')).toBeTruthy();
     expect(wrapper.findAllComponents(TableBodyCell).at(3).html().includes('account-2')).toBeTruthy();
-  });
-
-  test('sort: sortable class should exits', () => {
-    const wrapper = TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name', sortable: true }
-        ]
-      }
-    });
-    expect(wrapper.findAllComponents(TableHeaderCell).at(0).html().includes('fy-table__header-column_sortable')).toBeTruthy();
-  });
-
-  test('sort: built-in sort', async () => {
-    const data = [
-        { name: 'name-5', rank: 5 },
-        { name: 'name-3', rank: 3 },
-        { name: 'name-2', rank: 2 },
-        { name: 'name-4', rank: 4 },
-        { name: 'name-1', rank: 1 }
-    ];
-    const wrapper = TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' },
-          { dataIndex: 'rank', header: 'Rank', sortable: true }
-        ],
-        data: [
-          ...data
-        ],
-        sortOptions: {
-          sortKey: '',
-          sortType: SORT_TYPE.NONE
-        }
-      }
-    });
-    let sortedData = [...data];
-    // .sync 写法单纯触发事件不会更新视图，需要手动 setProps 一下
-    wrapper.vm.$on('update:sortOptions', (opt) => {
-      wrapper.setProps({
-        sortOptions: opt
-      })
-    });
-    // 点一次升序
-    await wrapper.findAllComponents(TableHeaderCell).at(1).trigger('click');
-    sortedData.sort((a, b) => a.rank > b.rank ? 1 : -1);
-    for (let i = 0; i < sortedData.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(sortedData[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(sortedData[i].rank)).toBeTruthy();
-    }
-    // 再点一次降序
-    await wrapper.findAllComponents(TableHeaderCell).at(1).trigger('click');
-    sortedData.sort((a, b) => a.rank > b.rank ? -1 : 1);
-    for (let i = 0; i < sortedData.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(sortedData[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(sortedData[i].rank)).toBeTruthy();
-    }
-    // 再点一次不排序
-    await wrapper.findAllComponents(TableHeaderCell).at(1).trigger('click');
-    for (let i = 0; i < data.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(data[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(data[i].rank)).toBeTruthy();
-    }
-
-    // 点击 sortable: false 的列，应该无效果
-    await wrapper.findAllComponents(TableHeaderCell).at(0).trigger('click');
-    for (let i = 0; i < data.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(data[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(data[i].rank)).toBeTruthy();
-    }
-  });
-
-  test('sort: custom sort', async () => {
-    const data = [
-      { name: 'name-1', rank: 5 },
-      { name: 'name-2', rank: 3 },
-      { name: 'name-3', rank: 2 },
-      { name: 'name-4', rank: 4 },
-      { name: 'name-5', rank: 1 }
-    ];
-    const sortFn = (a, b) => a.rank < b.rank ? 1 : -1;
-    const wrapper = TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' },
-          { dataIndex: 'rank', header: 'Rank', sortable: true, sortFn }
-        ],
-        data
-      }
-    });
-    // .sync 写法单纯触发事件不会更新视图，需要手动 setProps 一下
-    wrapper.vm.$on('update:sortOptions', (opt) => {
-      wrapper.setProps({
-        sortOptions: opt
-      })
-    });
-    await wrapper.findAllComponents(TableHeaderCell).at(1).trigger('click');
-    const sortedData = [...data];
-    sortedData.sort(sortFn);
-    for (let i = 0; i < sortedData.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(sortedData[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(sortedData[i].rank)).toBeTruthy();
-    }
-
-    await wrapper.findAllComponents(TableHeaderCell).at(1).trigger('click');
-    sortedData.sort((a, b) => -sortFn(a, b));
-    for (let i = 0; i < sortedData.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(sortedData[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(sortedData[i].rank)).toBeTruthy();
-    }
-
-    await wrapper.findAllComponents(TableHeaderCell).at(1).trigger('click');
-    for (let i = 0; i < data.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(data[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(data[i].rank)).toBeTruthy();
-    }
-  })
-
-  test('sort: remote sort', async () => {
-    const data = [
-      { name: 'name-1', rank: 5 },
-      { name: 'name-2', rank: 3 },
-      { name: 'name-3', rank: 2 },
-      { name: 'name-4', rank: 4 },
-      { name: 'name-5', rank: 1 }
-    ];
-    const wrapper = TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' },
-          { dataIndex: 'rank', header: 'Rank', sortable: true }
-        ],
-        data,
-        sortOptions: {
-          sortKey: '',
-          sortType: SORT_TYPE.NONE,
-          remote: true
-        }
-      }
-    });
-    // .sync 写法单纯触发事件不会更新视图，需要手动 setProps 一下
-    wrapper.vm.$on('update:sortOptions', (opt) => {
-      wrapper.setProps({
-        sortOptions: opt
-      })
-    });
-    // 配了 remote 的点击后不会引起数据更新，单纯外发事件交由外部处理
-    await wrapper.findAllComponents(TableHeaderCell).at(1).trigger('click');
-    for (let i = 0; i < data.length; i++) {
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(data[i].name)).toBeTruthy();
-      expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(data[i].rank)).toBeTruthy();
-    }
   });
 
   test('slot', () => {
@@ -213,98 +64,71 @@ describe('Table', () => {
     expect(wrapper.findAllComponents(TableBodyCell).at(0).html().includes('NAME-1')).toBeTruthy();
   });
 
-  test('pagination: limit < data.length', () => {
+  test('event trigger', async () => {
+    const columns = [
+      { dataIndex: 'name', header: 'Name', sortable: true }
+    ];
+    const data = [
+      { name: 'name-1' },
+      { name: 'name-2' }
+    ];
     const wrapper = TableMount({
       propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name', sortable: true }
-        ],
-        data: [
-          { name: 'xxx' },
-          { name: 'yyy' },
-          { name: 'zzz' }
-        ],
+        columns,
+        data,
         paginationOptions: {
           enable: true,
-          limit: 5,
+          limit: 1,
           page: 1
+        },
+        sortOptions: {
+          sortKey: '',
+          sortType: SORT_TYPE.NONE
         }
       }
     });
-    expect(wrapper.findComponent(Pagination).exists()).toBeTruthy();
-  });
-
-  test('pagination: limit > data.length', async () => {
-    const wrapper = TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' }
-        ],
-        data: [
-          { name: 'name-1' },
-          { name: 'name-2' },
-          { name: 'name-3' }
-        ],
-        paginationOptions: {
-          enable: true,
-          limit: 2,
-          page: 1
-        }
-      }
+    let events = [];
+    wrapper.vm.$on('cell:click', data => events.push({
+      event: 'cell:click',
+      data
+    }));
+    wrapper.vm.$on('row:click', data => events.push({
+      event: 'row:click',
+      data
+    }));
+    wrapper.vm.$on('sort:change', data => events.push({
+      event: 'sort:change',
+      data
+    }));
+    wrapper.vm.$on('pagination:change', data => events.push({
+      event: 'pagination:change',
+      data
+    }));
+    await wrapper.findAllComponents(TableBodyCell).at(0).trigger('click');
+    await wrapper.findComponent(TableHeaderCell).find('.' + SORTABLE_CLASS).trigger('click');
+    await wrapper.findComponent(Pagination).find('.' + NEXT_CLASS).trigger('click');
+    expect(events[0].event === 'cell:click').toBeTruthy();
+    expect(events[0].data).toEqual({
+      record: data[0],
+      index: 0,
+      column: columns[0]
     });
-    // 共2页，当前第1页
-    expect(wrapper.findComponent(Pagination).html().includes('(1 / 2)')).toBeTruthy();
-    // .sync 写法单纯触发事件不会更新视图，需要手动 setProps 一下
-    wrapper.vm.$on('update:paginationOptions', (opt) => {
-      wrapper.setProps({
-        paginationOptions: opt
-      })
+    expect(events[1].event === 'row:click').toBeTruthy();
+    expect(events[1].data).toEqual({
+      record: data[0],
+      index: 0
     });
-
-    // 在第一页点上一页，应该无效果
-    await wrapper.findComponent(Pagination).find('.fy-pagination__prev').trigger('click');
-    expect(wrapper.findAllComponents(TableBodyCell).at(0).html().includes('name-1')).toBeTruthy();
-
-    // 正常跳转下一页
-    await wrapper.findComponent(Pagination).find('.fy-pagination__next').trigger('click');
-    expect(wrapper.findAllComponents(TableBodyCell).at(0).html().includes('name-3')).toBeTruthy();
-
-    // 在最后一页点下一页，应该无效果
-    await wrapper.findComponent(Pagination).find('.fy-pagination__next').trigger('click');
-    expect(wrapper.findAllComponents(TableBodyCell).at(0).html().includes('name-3')).toBeTruthy();
-  });
-
-  test('pagination: remote pagination', async () => {
-    const wrapper = TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' }
-        ],
-        data: [
-          { name: 'name-1' },
-          { name: 'name-2' }
-        ],
-        paginationOptions: {
-          limit: 2,
-          page: 1,
-          total: 10,
-          remote: true,
-          enable: true
-        }
-      }
+    expect(events[2].event === 'sort:change').toBeTruthy();
+    expect(events[2].data).toEqual({
+      sortKey: 'name',
+      sortType: SORT_TYPE.ASC
     });
-    // .sync 写法单纯触发事件不会更新视图，需要手动 setProps 一下
-    wrapper.vm.$on('update:paginationOptions', (opt) => {
-      wrapper.setProps({
-        paginationOptions: opt
-      })
+    expect(events[3].event === 'pagination:change').toBeTruthy();
+    expect(events[3].data).toEqual({
+      enable: true,
+      page: 2,
+      limit: 1
     });
-
-    expect(wrapper.findComponent(Pagination).html().includes('1 / 5')).toBeTruthy();
-
-    // 有下一页，但点击只触发事件，数据更新交由外部去做
-    await wrapper.findComponent(Pagination).find('.fy-pagination__next').trigger('click');
-    expect(wrapper.findAllComponents(TableBodyCell).at(0).html().includes('name-1')).toBeTruthy();
   });
 
 })

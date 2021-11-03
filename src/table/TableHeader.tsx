@@ -5,7 +5,7 @@
 import { defineComponent } from '@vue/composition-api'
 import { TRACE } from '../utils';
 import TableHeaderCell from './TableHeaderCell';
-import { ISortOptions, tableHeaderProps } from './types';
+import { ICellClickEvent, IRowClickEvent, ISortOptions, tableHeaderProps } from './types';
 
 export default defineComponent({
     name: 'TableHeader',
@@ -17,7 +17,7 @@ export default defineComponent({
           module: 'TableHeader'
         });
         emit('update:sortOptions', opt);
-      };
+      }
       return {
         onUpdateSortOptions
       };

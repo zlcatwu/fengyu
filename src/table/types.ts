@@ -165,4 +165,15 @@ export type ITableContentSlot = (options: {
   data: ITableData
 }) => VNode;
 
+export type ICellClickEvent = {
+  record: ITableData;
+  column: IColumnOptions;
+  index: number;
+};
+
+export type IRowClickEvent = {
+  record: ITableData;
+  index: number;
+};
+
 export type TablePublicProps = IxPublicPropTypes<typeof tableProps>
