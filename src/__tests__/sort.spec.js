@@ -11,6 +11,11 @@ const SORTABLE_DESC_CLASS = 'fy-table__header-column_sortable_desc';
 describe('Table: sort', () => {
   const TableMount = options => mount(FyTable, options)
 
+  beforeAll(() => {
+    jest.spyOn(console, 'trace')
+      .mockImplementation(() => {});
+  });
+
   test('sort: sortable class should exits', () => {
     const wrapper = TableMount({
       propsData: {

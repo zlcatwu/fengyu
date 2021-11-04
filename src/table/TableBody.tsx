@@ -3,15 +3,15 @@
  */
 
 import { defineComponent, inject } from '@vue/composition-api'
+import { tableCommonSymbol } from '../utils';
 import TableBodyCell from './TableBodyCell';
-import { ICellClickEvent, IRowClickEvent, tableBodyProps } from './types';
+import { ITableCommonData, tableBodyProps } from './types';
 
 export default defineComponent({
   name: 'TableBody',
   props: tableBodyProps,
   setup() {
-    const onCellClick = inject('onCellClick') as (data: ICellClickEvent) => void;
-    const onRowClick = inject('onRowClick') as (data: IRowClickEvent) => void;
+    const { onCellClick, onRowClick } = inject(tableCommonSymbol) as ITableCommonData;
     return {
       onCellClick,
       onRowClick

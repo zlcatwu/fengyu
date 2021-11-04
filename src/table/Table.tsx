@@ -2,24 +2,24 @@
  * Created by uedc on 2021/10/11.
  */
 
-import { defineComponent, computed, ComputedRef, provide } from '@vue/composition-api'
+import { defineComponent, computed, provide } from '@vue/composition-api'
 import {
   tableProps, Slots, IColumnOptions,
   ISortOptions, ITablePaginationOptions,
-  ITableData, SORT_TYPE, IRowClickEvent, ICellClickEvent, ITableOptions, ITableFilterFn
+  ITableData, SORT_TYPE, IRowClickEvent, ICellClickEvent, TablePublicProps
 } from './types'
 import TableHeader from './TableHeader';
 import TableBody from './TableBody';
 import Pagination from '../pagination/Pagination';
-import { DEBUG, ERROR, TRACE } from '../utils';
+import { DEBUG, TRACE, tableCommonSymbol } from '../utils';
 
 export default defineComponent({
   name: 'FyTable',
   props: tableProps,
   setup(props, { emit, slots }) {
     const { headerColumns, bodyColumns } = useColumns(props.columns, slots);
-    const { displayedData, filteredData } = useDisplayData(props);
-    const { total } = usePagination(props.paginationOptions, filteredData);
+    const { displayedData } = useDisplayData(props);
+    const { total } = usePagination(props.paginationOptions, props.data);
 
     const onCellClick = (data: ICellClickEvent) => emit('cell:click', data);
     const onRowClick = (data: IRowClickEvent) => emit('row:click', data);
@@ -31,9 +31,11 @@ export default defineComponent({
       emit('update:sortOptions', sortOptions);
       emit('sort:change', sortOptions);
     };
-    provide('onCellClick', onCellClick);
-    provide('onRowClick', onRowClick);
-    provide('onSortChange', onSortChange);
+    provide(tableCommonSymbol, {
+      onSortChange,
+      onRowClick,
+      onCellClick
+    });
     const onPageChange = (page: number) => {
       const opt = {
         ...props.paginationOptions,
@@ -77,29 +79,17 @@ export default defineComponent({
   }
 })
 
-function useDisplayData (props: {
+type IDisplayedDataOpt = {
   data: ITableData[],
   sortOptions: ISortOptions,
   columns: IColumnOptions[],
-  paginationOptions: ITablePaginationOptions,
-  options: ITableOptions
-}) {
-  const filterWrapper: ITableFilterFn = ({ data, columns }) => {
-    if (typeof props.options.filterFn === 'function') {
-      const result = props.options.filterFn.call(null, { data, columns });
-      // 返回值异常，抛错误做容错
-      if (!Array.isArray(result)) {
-        ERROR({
-          module: 'Table',
-          msg: `filterFn should return an array`
-        });
-        return data;
-      }
-      return result;
-    }
-    return data;
-  };
-  const sortWrapper = ({ data, sortOptions, columns }: {
+  paginationOptions: ITablePaginationOptions
+};
+
+type IWrapperFn = (opt: IDisplayedDataOpt) => ITableData[];
+
+function useDisplayData (props: IDisplayedDataOpt) {
+  const sortWrapper: IWrapperFn = ({ data, sortOptions, columns }: {
     data: ITableData[],
     sortOptions: ISortOptions,
     columns: IColumnOptions[]
@@ -118,7 +108,7 @@ function useDisplayData (props: {
 
     return sortedData;
   };
-  const paginationWrapper = ({ data, paginationOptions }: {
+  const paginationWrapper: IWrapperFn = ({ data, paginationOptions }: {
     data: ITableData[],
     paginationOptions: ITablePaginationOptions
   }) => {
@@ -131,30 +121,19 @@ function useDisplayData (props: {
     const end = start + paginationOptions.limit;
     return paginationData.slice(start, end);
   };
-  // 分页的总数由 filteredData 来
-  const filteredData = computed(() => {
-    const filteredData = filterWrapper({
-      data: props.data,
-      columns: props.columns
-    });
-    return filteredData;
-  });
+  const compose: (...fns: IWrapperFn[]) => (data: ITableData[], opt: Partial<IDisplayedDataOpt>) => ITableData[] = (...fns) => {
+    return (data, opt) => fns.reduce((handledData, curFn) => curFn.call(null, {
+        ...opt,
+        data: handledData
+      } as IDisplayedDataOpt), data);
+  };
   const displayedData = computed(() => {
-    let data = filteredData.value;
-    data = sortWrapper({
-      data: data,
-      sortOptions: props.sortOptions,
-      columns: props.columns
-    });
-    data = paginationWrapper({
-      data: data,
-      paginationOptions: props.paginationOptions
-    });
+    const fn = compose(sortWrapper, paginationWrapper);
+    let data = fn(props.data, props);
     return data;
   });
   return {
-    displayedData,
-    filteredData
+    displayedData
   };
 }
 
@@ -179,9 +158,9 @@ function useColumns (columns: IColumnOptions[], slots: Slots) {
   };
 }
 
-function usePagination (paginationOptions: ITablePaginationOptions, data: ComputedRef<ITableData[]>) {
+function usePagination (paginationOptions: ITablePaginationOptions, data: ITableData[]) {
   // 远端分页的话 total 由外部传入，本地分页的话 total = data.length
-  const total = computed(() =>  paginationOptions.remote ? paginationOptions.total : data.value.length);
+  const total = computed(() =>  paginationOptions.remote ? paginationOptions.total : data.length);
   return {
     total
   };

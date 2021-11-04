@@ -10,36 +10,30 @@ type IMsg = {
   module: string
 };
 
-function TRACE(msg: IMsg) {
+export function TRACE(msg: IMsg) {
   const basic = getBasicInfo();
   console.trace(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
 }
 
-function DEBUG(msg: IMsg) {
+export function DEBUG(msg: IMsg) {
   const basic = getBasicInfo();
   console.debug(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
 }
 
-function INFO(msg: IMsg) {
+export function INFO(msg: IMsg) {
   const basic = getBasicInfo();
   console.info(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
 }
 
 // 没用到，降低我覆盖率，给扬了 =- =
-// function WARN(msg: IMsg) {
+// export function WARN(msg: IMsg) {
 //   const basic = getBasicInfo();
 //   console.warn(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
 // }
 
-function ERROR(msg: IMsg) {
-  const basic = getBasicInfo();
-  console.error(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
-}
+// export function ERROR(msg: IMsg) {
+//   const basic = getBasicInfo();
+//   console.error(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
+// }
 
-export {
-  TRACE,
-  DEBUG,
-  INFO,
-  // WARN,
-  ERROR
-};
+export const tableCommonSymbol = Symbol('onSortChangeSymbol');

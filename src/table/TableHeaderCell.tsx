@@ -3,15 +3,15 @@
  */
 
 import { computed, defineComponent, inject } from '@vue/composition-api'
-import { TRACE } from '../utils';
-import { tableHeaderCellProps, ISortOptions, SORT_TYPE, IColumnOptions } from './types';
+import { tableCommonSymbol, TRACE } from '../utils';
+import { tableHeaderCellProps, ISortOptions, SORT_TYPE, IColumnOptions, ITableCommonData } from './types';
 
 export default defineComponent({
   name: 'TableHeaderCell',
   props: tableHeaderCellProps,
   setup(props, { emit }) {
     const { nextType, sortCls } = useSortStates(props);
-    const onRootSortChange = inject('onSortChange') as (opt: ISortOptions) => void;
+    const { onSortChange: onRootSortChange } = inject(tableCommonSymbol) as ITableCommonData;
     const onSortChange = () => {
       const nextSortOptions: ISortOptions = {
           sortType: nextType.value,

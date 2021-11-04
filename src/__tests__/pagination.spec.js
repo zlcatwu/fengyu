@@ -9,6 +9,11 @@ const NEXT_CLASS = 'fy-pagination__next';
 describe('Table:pagination', () => {
   const TableMount = options => mount(FyTable, options)
 
+  beforeAll(() => {
+    jest.spyOn(console, 'trace')
+      .mockImplementation(() => {});
+  });
+
   test('limit < data.length', () => {
     const wrapper = TableMount({
       propsData: {

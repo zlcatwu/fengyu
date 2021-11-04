@@ -9,6 +9,14 @@ const SORTABLE_CLASS = 'fy-table__header-column_sortable';
 const NEXT_CLASS = 'fy-pagination__next';
 
 describe('Table', () => {
+
+  beforeAll(() => {
+    jest.spyOn(console, 'trace')
+      .mockImplementation(() => {});
+    jest.spyOn(console, 'error')
+      .mockImplementation(() => {});
+  });
+
   const TableMount = options => mount(FyTable, options)
 
   test('render', () => {
@@ -117,9 +125,8 @@ describe('Table', () => {
       event: 'pagination:change',
       data
     }));
+    // 验证点击事件触发 cell:click row:click
     await wrapper.findAllComponents(TableBodyCell).at(0).trigger('click');
-    await wrapper.findComponent(TableHeaderCell).find('.' + SORTABLE_CLASS).trigger('click');
-    await wrapper.findComponent(Pagination).find('.' + NEXT_CLASS).trigger('click');
     expect(events[0].event === 'cell:click').toBeTruthy();
     expect(events[0].data).toEqual({
       record: data[0],
@@ -131,82 +138,23 @@ describe('Table', () => {
       record: data[0],
       index: 0
     });
+
+    // 验证排序事件触发 sort:change
+    await wrapper.findComponent(TableHeaderCell).find('.' + SORTABLE_CLASS).trigger('click');
     expect(events[2].event === 'sort:change').toBeTruthy();
     expect(events[2].data).toEqual({
       sortKey: 'name',
       sortType: SORT_TYPE.ASC
     });
+
+    // 验证分页事件触发 pagination:change
+    await wrapper.findComponent(Pagination).find('.' + NEXT_CLASS).trigger('click');
     expect(events[3].event === 'pagination:change').toBeTruthy();
     expect(events[3].data).toEqual({
       enable: true,
       page: 2,
       limit: 1
     });
-  });
-
-  test('filter function', () => {
-    const data = [
-      { name: 'name-1', age: 30 },
-      { name: 'name-2', age: 50 },
-      { name: 'name-3', age: 66 },
-      { name: 'name-3', age: 58 },
-      { name: 'name-3', age: 28 }
-    ];
-    const filterFn = record => record.age > 40;
-    const paginationOptions = {
-      enable: true,
-      page: 1,
-      limit: 2
-    };
-    const wrapper = TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' },
-          { dataIndex: 'age', header: 'Age' }
-        ],
-        data,
-        paginationOptions,
-        options: {
-          filterFn: ({ data }) => data.filter(filterFn)
-        }
-      }
-    });
-    expect(wrapper.findComponent(Pagination).find('.fy-pagination__page').html().includes('1 / 2')).toBeTruthy();
-    const handledData = data.filter(filterFn).slice(0, paginationOptions.limit)
-    const cells = wrapper.findAllComponents(TableBodyCell);
-    handledData.forEach((record, idx) => {
-      expect(cells.at(idx * 2 + 1).html().includes(record.age)).toBeTruthy();
-    });
-  });
-
-  test('wrong filter function', () => {
-    const data = [
-      { name: 'name-1', age: 30 },
-      { name: 'name-2', age: 50 },
-      { name: 'name-3', age: 66 },
-      { name: 'name-3', age: 58 },
-      { name: 'name-3', age: 28 }
-    ];
-    const paginationOptions = {
-      enable: true,
-      page: 1,
-      limit: 2
-    };
-    const errorSpy = jest.spyOn(console, 'error');
-    TableMount({
-      propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' },
-          { dataIndex: 'age', header: 'Age' }
-        ],
-        data,
-        paginationOptions,
-        options: {
-          filterFn: ({ data }) => null
-        }
-      }
-    });
-    expect(errorSpy).toHaveBeenCalled();
   });
 
 })
