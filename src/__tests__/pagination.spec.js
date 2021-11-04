@@ -13,12 +13,14 @@ describe('Table:pagination', () => {
     const wrapper = TableMount({
       propsData: {
         columns: [
-          { dataIndex: 'name', header: 'Name', sortable: true }
+          { dataIndex: 'name', header: 'Name', sortable: true },
         ],
         data: [
           { name: 'xxx' },
           { name: 'yyy' },
-          { name: 'zzz' }
+          { name: 'zzz' },
+          { name: 'ddd' },
+          { name: 'aaa' }
         ],
         paginationOptions: {
           enable: true,

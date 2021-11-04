@@ -5,6 +5,8 @@ import TableHeaderCell from '../table/TableHeaderCell'
 import { SORT_TYPE } from '../table/types'
 
 const SORTABLE_CLASS = 'fy-table__header-column_sortable';
+const SORTABLE_ASC_CLASS = 'fy-table__header-column_sortable_asc';
+const SORTABLE_DESC_CLASS = 'fy-table__header-column_sortable_desc';
 
 describe('Table: sort', () => {
   const TableMount = options => mount(FyTable, options)
@@ -100,25 +102,30 @@ describe('Table: sort', () => {
       })
     });
 
+    const rankIdx = 1;
+    const rankHeaderCell = wrapper.findAllComponents(TableHeaderCell).at(rankIdx);
     // 升序
-    await wrapper.findAllComponents(TableHeaderCell).at(1).find('.' + SORTABLE_CLASS).trigger('click');
+    // 检验数据与样式
+    await wrapper.findAllComponents(TableHeaderCell).at(rankIdx).find('.' + SORTABLE_CLASS).trigger('click');
     const sortedData = [...data];
     sortedData.sort(sortFn);
     for (let i = 0; i < sortedData.length; i++) {
       expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(sortedData[i].name)).toBeTruthy();
       expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(sortedData[i].rank)).toBeTruthy();
     }
+    expect(rankHeaderCell.html().includes(SORTABLE_ASC_CLASS)).toBeTruthy();
 
     // 降序
-    await wrapper.findAllComponents(TableHeaderCell).at(1).find('.' + SORTABLE_CLASS).trigger('click');
+    await wrapper.findAllComponents(TableHeaderCell).at(rankIdx).find('.' + SORTABLE_CLASS).trigger('click');
     sortedData.sort((a, b) => -sortFn(a, b));
     for (let i = 0; i < sortedData.length; i++) {
       expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(sortedData[i].name)).toBeTruthy();
       expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(sortedData[i].rank)).toBeTruthy();
     }
+    expect(rankHeaderCell.html().includes(SORTABLE_DESC_CLASS)).toBeTruthy();
 
     // 恢复
-    await wrapper.findAllComponents(TableHeaderCell).at(1).find('.' + SORTABLE_CLASS).trigger('click');
+    await wrapper.findAllComponents(TableHeaderCell).at(rankIdx).find('.' + SORTABLE_CLASS).trigger('click');
     for (let i = 0; i < data.length; i++) {
       expect(wrapper.findAllComponents(TableBodyCell).at(i * 2).html().includes(data[i].name)).toBeTruthy();
       expect(wrapper.findAllComponents(TableBodyCell).at(i * 2 + 1).html().includes(data[i].rank)).toBeTruthy();

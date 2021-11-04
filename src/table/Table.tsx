@@ -2,25 +2,27 @@
  * Created by uedc on 2021/10/11.
  */
 
-import { defineComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed, ComputedRef, provide } from '@vue/composition-api'
 import {
   tableProps, Slots, IColumnOptions,
   ISortOptions, ITablePaginationOptions,
-  ITableData, SORT_TYPE, IRowClickEvent, ICellClickEvent
+  ITableData, SORT_TYPE, IRowClickEvent, ICellClickEvent, ITableOptions, ITableFilterFn
 } from './types'
 import TableHeader from './TableHeader';
 import TableBody from './TableBody';
 import Pagination from '../pagination/Pagination';
-import { DEBUG, TRACE } from '../utils';
+import { DEBUG, ERROR, TRACE } from '../utils';
 
 export default defineComponent({
   name: 'FyTable',
   props: tableProps,
   setup(props, { emit, slots }) {
     const { headerColumns, bodyColumns } = useColumns(props.columns, slots);
-    const { displayedData } = useDisplayData(props);
-    const { total } = usePagination(props.paginationOptions, props.data);
+    const { displayedData, filteredData } = useDisplayData(props);
+    const { total } = usePagination(props.paginationOptions, filteredData);
 
+    const onCellClick = (data: ICellClickEvent) => emit('cell:click', data);
+    const onRowClick = (data: IRowClickEvent) => emit('row:click', data);
     const onSortChange = (sortOptions: ISortOptions) => {
       TRACE({
         msg: `onSortChange trigger update:sortOptions ${JSON.stringify(sortOptions)}`,
@@ -29,6 +31,9 @@ export default defineComponent({
       emit('update:sortOptions', sortOptions);
       emit('sort:change', sortOptions);
     };
+    provide('onCellClick', onCellClick);
+    provide('onRowClick', onRowClick);
+    provide('onSortChange', onSortChange);
     const onPageChange = (page: number) => {
       const opt = {
         ...props.paginationOptions,
@@ -41,10 +46,10 @@ export default defineComponent({
       emit('update:paginationOptions', opt);
       emit('pagination:change', opt);
     };
+
     return {
       headerColumns,
       bodyColumns,
-      onSortChange,
       onPageChange,
       displayedData,
       total
@@ -54,16 +59,9 @@ export default defineComponent({
     return <div class="fy-table">
       <table class="fy-table__table">
         <TableHeader
-          on={{
-            'update:sortOptions': this.onSortChange
-          }}
           columns={this.headerColumns}
           sortOptions={this.sortOptions} />
         <TableBody
-          on={{
-            'row:click': (data: IRowClickEvent) => this.$emit('row:click', data),
-            'cell:click': (data: ICellClickEvent) => this.$emit('cell:click', data)
-          }}
           columns={this.bodyColumns}
           data={this.displayedData} />
       </table>
@@ -84,7 +82,23 @@ function useDisplayData (props: {
   sortOptions: ISortOptions,
   columns: IColumnOptions[],
   paginationOptions: ITablePaginationOptions,
+  options: ITableOptions
 }) {
+  const filterWrapper: ITableFilterFn = ({ data, columns }) => {
+    if (typeof props.options.filterFn === 'function') {
+      const result = props.options.filterFn.call(null, { data, columns });
+      // 返回值异常，抛错误做容错
+      if (!Array.isArray(result)) {
+        ERROR({
+          module: 'Table',
+          msg: `filterFn should return an array`
+        });
+        return data;
+      }
+      return result;
+    }
+    return data;
+  };
   const sortWrapper = ({ data, sortOptions, columns }: {
     data: ITableData[],
     sortOptions: ISortOptions,
@@ -117,12 +131,18 @@ function useDisplayData (props: {
     const end = start + paginationOptions.limit;
     return paginationData.slice(start, end);
   };
-  const displayedData = computed(() => {
-    // 数据处理函数均遵循 (options: tableProps) => ITableData[]
-    // TODO: 后续可新增一个 filterWrapper 暴露出去做自定义筛选，加入到数据流最前面即可
-    // filter => sort => pagination
-    let data = sortWrapper({
+  // 分页的总数由 filteredData 来
+  const filteredData = computed(() => {
+    const filteredData = filterWrapper({
       data: props.data,
+      columns: props.columns
+    });
+    return filteredData;
+  });
+  const displayedData = computed(() => {
+    let data = filteredData.value;
+    data = sortWrapper({
+      data: data,
       sortOptions: props.sortOptions,
       columns: props.columns
     });
@@ -133,7 +153,8 @@ function useDisplayData (props: {
     return data;
   });
   return {
-    displayedData
+    displayedData,
+    filteredData
   };
 }
 
@@ -158,9 +179,9 @@ function useColumns (columns: IColumnOptions[], slots: Slots) {
   };
 }
 
-function usePagination (paginationOptions: ITablePaginationOptions, data: ITableData[]) {
+function usePagination (paginationOptions: ITablePaginationOptions, data: ComputedRef<ITableData[]>) {
   // 远端分页的话 total 由外部传入，本地分页的话 total = data.length
-  const total = computed(() =>  paginationOptions.remote ? paginationOptions.total : data.length);
+  const total = computed(() =>  paginationOptions.remote ? paginationOptions.total : data.value.length);
   return {
     total
   };

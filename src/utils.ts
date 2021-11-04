@@ -31,15 +31,15 @@ function INFO(msg: IMsg) {
 //   console.warn(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
 // }
 
-// function ERROR(msg: IMsg) {
-//   const basic = getBasicInfo();
-//   console.error(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
-// }
+function ERROR(msg: IMsg) {
+  const basic = getBasicInfo();
+  console.error(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
+}
 
 export {
   TRACE,
   DEBUG,
   INFO,
   // WARN,
-  // ERROR
+  ERROR
 };

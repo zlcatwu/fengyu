@@ -2,7 +2,7 @@
  * Created by uedc on 2021/10/11.
  */
 
-import { computed, defineComponent } from '@vue/composition-api'
+import { computed, defineComponent, inject } from '@vue/composition-api'
 import { TRACE } from '../utils';
 import { tableHeaderCellProps, ISortOptions, SORT_TYPE, IColumnOptions } from './types';
 
@@ -11,6 +11,7 @@ export default defineComponent({
   props: tableHeaderCellProps,
   setup(props, { emit }) {
     const { nextType, sortCls } = useSortStates(props);
+    const onRootSortChange = inject('onSortChange') as (opt: ISortOptions) => void;
     const onSortChange = () => {
       const nextSortOptions: ISortOptions = {
           sortType: nextType.value,
@@ -21,7 +22,7 @@ export default defineComponent({
         msg: `onSortChange trigger update:sortOptions ${JSON.stringify(nextSortOptions)}`,
         module: 'TableHeaderCell'
       });
-      emit('update:sortOptions', nextSortOptions);
+      onRootSortChange(nextSortOptions);
     };
     const onClick = () => emit('cell:click');
     return {

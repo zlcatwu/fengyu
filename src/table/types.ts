@@ -49,8 +49,14 @@ export type Slots = {
   [key: string]: Slot | undefined
 };
 
-// type ITableOptions = {
-// }
+export type ITableFilterFn = (opt: {
+  data: ITableData[],
+  columns: IColumnOptions[]
+}) => ITableData[];
+
+export type ITableOptions = {
+  filterFn?: ITableFilterFn;
+}
 
 // export type ISelectOptions = {
 //   idProperty: string;
@@ -81,10 +87,10 @@ export const tableProps = {
     type: Array as PropType<Array<ITableData>>,
     default: () => []
   },
-  // options: {
-  //   type: Object as PropType<ITableOptions>,
-  //   default: () => ({})
-  // },
+  options: {
+    type: Object as PropType<ITableOptions>,
+    default: () => ({})
+  },
   // selectOptions: {
   //   type: Object as PropType<ISelectOptions>,
   //   default: () => ({})

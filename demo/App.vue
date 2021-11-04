@@ -6,6 +6,7 @@
       :sortOptions.sync="tableOptions1.sortOptions"
       :paginationOptions.sync="tableOptions1.paginationOptions"
       :selectOptions.sync="tableOptions1.selectOptions"
+      :options="tableOptions1.options"
       @cell:click="onCellClick"
       @row:click="onRowClick"
       @pagination:change="onPaginationChange"
@@ -26,7 +27,7 @@
 <script lang="ts">
 import { FyTable } from '../src/table'
 import { defineComponent } from '@vue/composition-api'
-import { ICellClickEvent, IRowClickEvent, SORT_TYPE } from '../src/table/types';
+import { ICellClickEvent, IRowClickEvent, ITableData, ITableFilterFn, SORT_TYPE } from '../src/table/types';
 
 export default defineComponent({
   name: 'App',
@@ -37,14 +38,15 @@ export default defineComponent({
     return {
       tableOptions1: {
         data: [
-          { name: 'name-1', account: 'account-1' },
-          { name: 'name-2', account: 'account-2' },
-          { name: 'name-3', account: 'account-3' },
-          { name: 'name-4', account: 'account-4' }
+          { name: 'name-1', account: 'account-1', age: 1 },
+          { name: 'name-2', account: 'account-2', age: 10 },
+          { name: 'name-3', account: 'account-3', age: 40 },
+          { name: 'name-4', account: 'account-4', age: 60 }
         ],
         columns: [
           { header: 'Name', dataIndex: 'name', visible: true },
-          { header: 'Account', dataIndex: 'account', visible: true, sortable: true }
+          { header: 'Account', dataIndex: 'account', visible: true, sortable: true },
+          { header: 'Age', dataIndex: 'age' }
         ],
         sortOptions: {
           sortKey: '',
@@ -55,6 +57,11 @@ export default defineComponent({
           limit: 2,
           page: 1
         },
+        options: {
+          filterFn: ({ data }: { data: ITableData[] }) => {
+            return data.filter(record => record.age > 1)
+          }
+        }
         // selectOptions: {
         //   selectType: SELECT_TYPE.MULTI,
         //   selected: [],

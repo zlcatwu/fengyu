@@ -21,47 +21,60 @@ describe('Table', () => {
   })
 
   test('options with simple columns and data', () => {
+    const columns = [
+      { dataIndex: 'name', header: 'Name' },
+      { dataIndex: 'account', header: 'Account' }
+    ];
+    const data = [
+      { name: 'name-1', account: 'account-1' },
+      { name: 'name-2', account: 'account-2' }
+    ];
     const wrapper = TableMount({
       propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' },
-          { dataIndex: 'account', header: 'Account' }
-        ],
-        data: [
-          { name: 'name-1', account: 'account-1' },
-          { name: 'name-2', account: 'account-2' }
-        ]
+        columns,
+        data
       }
     });
-    expect(wrapper.findAllComponents(TableHeaderCell).at(0).html().includes('Name')).toBeTruthy();
-    expect(wrapper.findAllComponents(TableHeaderCell).at(1).html().includes('Account')).toBeTruthy();
-    expect(wrapper.findAllComponents(TableBodyCell).at(0).html().includes('name-1')).toBeTruthy();
-    expect(wrapper.findAllComponents(TableBodyCell).at(1).html().includes('account-1')).toBeTruthy();
-    expect(wrapper.findAllComponents(TableBodyCell).at(2).html().includes('name-2')).toBeTruthy();
-    expect(wrapper.findAllComponents(TableBodyCell).at(3).html().includes('account-2')).toBeTruthy();
+    // 验证头部渲染正常
+    const headerCells = wrapper.findAllComponents(TableHeaderCell);
+    columns.forEach((column, idx) => {
+      expect(headerCells.at(idx).html().includes(column.header)).toBeTruthy();
+    });
+    // 验证内容渲染正常
+    const bodyCells = wrapper.findAllComponents(TableBodyCell);
+    data.forEach((record, idx) => {
+      expect(bodyCells.at(idx * 2).html().includes(record.name)).toBeTruthy();
+      expect(bodyCells.at(idx * 2 + 1).html().includes(record.account)).toBeTruthy();
+    });
   });
 
   test('slot', () => {
+    const columns = [
+      { dataIndex: 'name', header: 'Name' },
+      { dataIndex: 'account', header: 'Account' }
+    ];
+    const data = [
+      { name: 'name-1', account: 'account-1' },
+      { name: 'name-2', account: 'account-2' }
+    ];
     const wrapper = TableMount({
       propsData: {
-        columns: [
-          { dataIndex: 'name', header: 'Name' },
-          { dataIndex: 'account', header: 'Account' }
-        ],
-        data: [
-          { name: 'name-1', account: 'account-1' },
-          { name: 'name-2', account: 'account-2' }
-        ],
-      },
-      slots: {
-        header__name: '<div>NAME</div>'
+        columns,
+        data,
       },
       scopedSlots: {
-        body__name: '<div slot-scope="scope">[ {{scope.data.name.toUpperCase()}} ]</div>'
+        header__name: '<div slot-scope="scope">{{ scope.data.header.toUpperCase() }}</div>',
+        body__name: '<div slot-scope="scope">{{scope.data.name.toUpperCase()}}</div>'
       }
     });
-    expect(wrapper.findAllComponents(TableHeaderCell).at(0).html().includes('NAME')).toBeTruthy();
-    expect(wrapper.findAllComponents(TableBodyCell).at(0).html().includes('NAME-1')).toBeTruthy();
+
+    const nameIdx = 0;
+    const nameHeaderCell = wrapper.findAllComponents(TableHeaderCell).at(nameIdx);
+    nameHeaderCell.html().includes(columns[nameIdx].header.toUpperCase());
+    const nameBodyCells = wrapper.findAllComponents(TableBodyCell);
+    data.forEach((record, idx) => {
+      expect(nameBodyCells.at(idx * 2).html().includes(record.name.toUpperCase())).toBeTruthy();
+    });
   });
 
   test('event trigger', async () => {
@@ -129,6 +142,71 @@ describe('Table', () => {
       page: 2,
       limit: 1
     });
+  });
+
+  test('filter function', () => {
+    const data = [
+      { name: 'name-1', age: 30 },
+      { name: 'name-2', age: 50 },
+      { name: 'name-3', age: 66 },
+      { name: 'name-3', age: 58 },
+      { name: 'name-3', age: 28 }
+    ];
+    const filterFn = record => record.age > 40;
+    const paginationOptions = {
+      enable: true,
+      page: 1,
+      limit: 2
+    };
+    const wrapper = TableMount({
+      propsData: {
+        columns: [
+          { dataIndex: 'name', header: 'Name' },
+          { dataIndex: 'age', header: 'Age' }
+        ],
+        data,
+        paginationOptions,
+        options: {
+          filterFn: ({ data }) => data.filter(filterFn)
+        }
+      }
+    });
+    expect(wrapper.findComponent(Pagination).find('.fy-pagination__page').html().includes('1 / 2')).toBeTruthy();
+    const handledData = data.filter(filterFn).slice(0, paginationOptions.limit)
+    const cells = wrapper.findAllComponents(TableBodyCell);
+    handledData.forEach((record, idx) => {
+      expect(cells.at(idx * 2 + 1).html().includes(record.age)).toBeTruthy();
+    });
+  });
+
+  test('wrong filter function', () => {
+    const data = [
+      { name: 'name-1', age: 30 },
+      { name: 'name-2', age: 50 },
+      { name: 'name-3', age: 66 },
+      { name: 'name-3', age: 58 },
+      { name: 'name-3', age: 28 }
+    ];
+    const paginationOptions = {
+      enable: true,
+      page: 1,
+      limit: 2
+    };
+    const errorSpy = jest.spyOn(console, 'error');
+    TableMount({
+      propsData: {
+        columns: [
+          { dataIndex: 'name', header: 'Name' },
+          { dataIndex: 'age', header: 'Age' }
+        ],
+        data,
+        paginationOptions,
+        options: {
+          filterFn: ({ data }) => null
+        }
+      }
+    });
+    expect(errorSpy).toHaveBeenCalled();
   });
 
 })

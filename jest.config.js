@@ -55,6 +55,11 @@ module.exports = {
       statements: 85,
     },
   },
-  coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/tests'],
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/tests',
+    // 薛导让我注释掉这个
+    '<rootDir>/src/table/types.ts'
+  ],
   reporters: ['default', 'jest-junit'],
 }
