@@ -173,4 +173,60 @@ describe('Table: sort', () => {
     }
   });
 
+  test('sort: different column sort', async () => {
+    const data = [
+      { name: 'name-1', age: 3, rank: 5 },
+      { name: 'name-2', age: 5, rank: 6 },
+      { name: 'name-3', age: 6, rank: 12 },
+      { name: 'name-4', age: 10, rank: 54 },
+      { name: 'name-5', age: 4, rank: 53 },
+      { name: 'name-6', age: 10, rank: 11 },
+      { name: 'name-7', age: 35, rank: 43 },
+      { name: 'name-8', age: 53, rank: 23 }
+    ];
+    const columns = [
+      { dataIndex: 'name', header: 'Name', sortable: false },
+      { dataIndex: 'age', header: 'Age', sortable: true },
+      { dataIndex: 'rank', header: 'Rank', sortable: true }
+    ];
+    const wrapper = TableMount({
+      propsData: {
+        data,
+        columns,
+        sortOptions: {
+          sortKey: '',
+          sortType: SORT_TYPE.NONE,
+        }
+      }
+    });
+    const headerCells = wrapper.findAllComponents(TableHeaderCell);
+    const ageIdx = 1;
+    const rankIdx = 2;
+    const ageCell = headerCells.at(ageIdx);
+    const rankCell = headerCells.at(rankIdx);
+    const bodyCells = wrapper.findAllComponents(TableBodyCell);
+    // .sync 写法单纯触发事件不会更新视图，需要手动 setProps 一下
+    wrapper.vm.$on('update:sortOptions', (opt) => {
+      wrapper.setProps({
+        sortOptions: opt
+      })
+    });
+    // 点击 age，数据按 sort 进行排序，age 有排序类，rank 没有排序类
+    await ageCell.find('.' + SORTABLE_CLASS).trigger('click');
+    const sortedData = [...data].sort((a, b) => a.age - b.age);
+    sortedData.forEach((record, idx) => {
+      expect(bodyCells.at(idx * 3 + ageIdx).html().includes(record.age)).toBeTruthy();
+    });
+    expect(ageCell.find('.' + SORTABLE_ASC_CLASS).exists()).toBeTruthy();
+    expect(rankCell.find('.' + SORTABLE_ASC_CLASS).exists()).toBeFalsy();
+
+    // 点击 rank，数据按 sort 进行排序，rank 有排序类，age 没有排序类
+    await rankCell.find('.' + SORTABLE_CLASS).trigger('click');
+    sortedData.sort((a, b) => a.rank - b.rank);
+    sortedData.forEach((record, idx) => {
+      expect(bodyCells.at(idx * 3 + rankIdx).html().includes(record.rank)).toBeTruthy();
+    });
+    expect(ageCell.find('.' + SORTABLE_ASC_CLASS).exists()).toBeFalsy();
+    expect(rankCell.find('.' + SORTABLE_ASC_CLASS).exists()).toBeTruthy();
+  });
 })

@@ -6,7 +6,7 @@ import { defineComponent, computed, provide } from '@vue/composition-api'
 import {
   tableProps, Slots, IColumnOptions,
   ISortOptions, ITablePaginationOptions,
-  ITableData, SORT_TYPE, IRowClickEvent, ICellClickEvent, TablePublicProps
+  ITableData, SORT_TYPE, IRowClickEvent, ICellClickEvent
 } from './types'
 import TableHeader from './TableHeader';
 import TableBody from './TableBody';

@@ -33,12 +33,6 @@ export enum SORT_TYPE {
   DESC = 'DESC'
 }
 
-// export enum SELECT_TYPE {
-//   NONE = 'NONE',
-//   MULTI = 'MULTI',
-//   SINGLE = 'SINGLE'
-// }
-
 export type ITableData = {
   [key: string]: any;
 }
@@ -48,23 +42,6 @@ export type Slot = (...args: any[]) => VNode[]
 export type Slots = {
   [key: string]: Slot | undefined
 };
-
-// export type ITableFilterFn = (opt: {
-//   data: ITableData[],
-//   columns: IColumnOptions[]
-// }) => ITableData[];
-
-// export type ITableOptions = {
-//   filterFn?: ITableFilterFn;
-// }
-
-// export type ISelectOptions = {
-//   idProperty: string;
-//   selected: Array<String | Number>;
-//   selectType: SELECT_TYPE;
-//   onBeforeSelect?: () => boolean;
-//   renderFn?: () => VNode | void;
-// }
 
 export type ISortOptions = {
   sortKey: string;
@@ -87,14 +64,6 @@ export const tableProps = {
     type: Array as PropType<Array<ITableData>>,
     default: () => []
   },
-  // options: {
-  //   type: Object as PropType<ITableOptions>,
-  //   default: () => ({})
-  // },
-  // selectOptions: {
-  //   type: Object as PropType<ISelectOptions>,
-  //   default: () => ({})
-  // },
   paginationOptions: {
     type: Object as PropType<ITablePaginationOptions>,
     default: () => ({})
