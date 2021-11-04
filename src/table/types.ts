@@ -55,7 +55,7 @@ export type IColumnOptions = {
   // visible?: boolean;
   sortable?: boolean;
   sortFn: (ra: ITableData, rb: ITableData) => number;
-  slot?: ITableHeaderSlot & ITableContentSlot;
+  slot?: Slot;
 }
 
 // Props 定义在这里
@@ -158,3 +158,12 @@ export type ITableCommonData = {
   onRowClick: (data: IRowClickEvent) => void;
   onSortChange: (data: ISortOptions) => void;
 };
+
+export type IDisplayedDataOpt = {
+  data: ITableData[],
+  sortOptions: ISortOptions,
+  columns: IColumnOptions[],
+  paginationOptions: ITablePaginationOptions
+};
+
+export type IDataWrapperFn = (opt: IDisplayedDataOpt) => ITableData[];

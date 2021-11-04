@@ -7,33 +7,39 @@ function getBasicInfo() {
 
 type IMsg = {
   msg: string,
-  module: string
+  module: string,
+  devOnly?: boolean
 };
 
-export function TRACE(msg: IMsg) {
+const isDev = true;
+
+function LOG(logFn: (str: string) => void, msg: IMsg) {
   const basic = getBasicInfo();
-  console.trace(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
+  // !(msg.devOnly && !isDev)
+  if (!msg.devOnly) {
+    logFn.call(null, `[${basic.time}].[${msg.module}]: ${msg.msg}`);
+  }
+}
+
+export function TRACE(msg: IMsg) {
+  LOG(console.trace, msg);
 }
 
 export function DEBUG(msg: IMsg) {
-  const basic = getBasicInfo();
-  console.debug(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
+  LOG(console.debug, msg);
 }
 
 export function INFO(msg: IMsg) {
-  const basic = getBasicInfo();
-  console.info(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
+  LOG(console.info, msg);
 }
 
 // 没用到，降低我覆盖率，给扬了 =- =
 // export function WARN(msg: IMsg) {
-//   const basic = getBasicInfo();
-//   console.warn(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
+// LOG(console.warn, msg);
 // }
 
 // export function ERROR(msg: IMsg) {
-//   const basic = getBasicInfo();
-//   console.error(`[${basic.time}].[${msg.module}]: ${msg.msg}`);
+// LOG(console.error, msg);
 // }
 
 export const tableCommonSymbol = Symbol('onSortChangeSymbol');

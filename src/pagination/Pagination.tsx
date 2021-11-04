@@ -15,11 +15,16 @@ export default defineComponent({
     const { prevCls, nextCls } = useClasses(props, pageTotal.value);
     const onTogglePage = (targetPage: number) => {
       if (targetPage <= 0 || targetPage > pageTotal.value) {
+        INFO({
+          msg: `invalid toggle page ${targetPage} / ${pageTotal.value}`,
+          module: 'Pagination'
+        });
         return;
       }
       TRACE({
         msg: `onTogglePage trigger update:page ${targetPage}`,
-        module: 'Pagination'
+        module: 'Pagination',
+        devOnly: true
       });
       emit('update:page', targetPage);
     };
@@ -32,10 +37,6 @@ export default defineComponent({
     };
   },
   render() {
-    INFO({
-      msg: `render with page: ${this.page}, total: ${this.total}, limit: ${this.limit}, pageTotal: ${this.pageTotal}`,
-      module: 'Pagination'
-    });
     return <div class="fy-pagination">
       <span
         onClick={() => this.onTogglePage(this.page - 1)}

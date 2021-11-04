@@ -27,7 +27,7 @@
 <script lang="ts">
 import { FyTable } from '../src/table'
 import { defineComponent } from '@vue/composition-api'
-import { ICellClickEvent, IRowClickEvent, ITableData, ITableFilterFn, SORT_TYPE } from '../src/table/types';
+import { ICellClickEvent, IRowClickEvent, ITableData, SORT_TYPE } from '../src/table/types';
 
 export default defineComponent({
   name: 'App',
@@ -89,6 +89,10 @@ export default defineComponent({
     onSortChange() {}
   },
   mounted() {
+    setTimeout(() => {
+      this.tableOptions1.paginationOptions.enable = false;
+      console.log('call');
+    }, 2000);
   }
 })
 </script>

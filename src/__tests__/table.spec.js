@@ -4,11 +4,21 @@ import TableBodyCell from '../table/TableBodyCell'
 import TableHeaderCell from '../table/TableHeaderCell'
 import { SORT_TYPE } from '../table/types'
 import Pagination from '../pagination/Pagination'
+import Vue from 'vue'
 
 const SORTABLE_CLASS = 'fy-table__header-column_sortable';
 const NEXT_CLASS = 'fy-pagination__next';
 
 describe('Table', () => {
+
+  const columns = [
+    { dataIndex: 'name', header: 'Name', sortable: true },
+    { dataIndex: 'account', header: 'Account' }
+  ];
+  const data = [
+    { name: 'name-1', account: 'account-1' },
+    { name: 'name-2', account: 'account-2' }
+  ];
 
   beforeAll(() => {
     jest.spyOn(console, 'trace')
@@ -29,14 +39,6 @@ describe('Table', () => {
   })
 
   test('options with simple columns and data', () => {
-    const columns = [
-      { dataIndex: 'name', header: 'Name' },
-      { dataIndex: 'account', header: 'Account' }
-    ];
-    const data = [
-      { name: 'name-1', account: 'account-1' },
-      { name: 'name-2', account: 'account-2' }
-    ];
     const wrapper = TableMount({
       propsData: {
         columns,
@@ -57,14 +59,6 @@ describe('Table', () => {
   });
 
   test('slot', () => {
-    const columns = [
-      { dataIndex: 'name', header: 'Name' },
-      { dataIndex: 'account', header: 'Account' }
-    ];
-    const data = [
-      { name: 'name-1', account: 'account-1' },
-      { name: 'name-2', account: 'account-2' }
-    ];
     const wrapper = TableMount({
       propsData: {
         columns,
@@ -86,13 +80,6 @@ describe('Table', () => {
   });
 
   test('event trigger', async () => {
-    const columns = [
-      { dataIndex: 'name', header: 'Name', sortable: true }
-    ];
-    const data = [
-      { name: 'name-1' },
-      { name: 'name-2' }
-    ];
     const wrapper = TableMount({
       propsData: {
         columns,
@@ -155,6 +142,42 @@ describe('Table', () => {
       page: 2,
       limit: 1
     });
+  });
+
+  // 测一下响应式丢没丢
+  test('reactive', async () => {
+    const wrapper = TableMount({
+      propsData: {
+        columns,
+        data,
+        paginationOptions: {
+          enable: true,
+          limit: 10,
+          page: 1
+        },
+        sortOptions: {
+          sortKey: '',
+          sortType: SORT_TYPE.NONE
+        }
+      }
+    });
+    expect(wrapper.findComponent(Pagination).exists()).toBeTruthy();
+    expect(wrapper.findComponent(TableHeaderCell).find('.' + SORTABLE_CLASS).exists()).toBeTruthy();
+    expect(wrapper.findAllComponents(TableBodyCell).length).toEqual(data.length * columns.length);
+    wrapper.setProps({
+      paginationOptions: {
+        enable: false
+      },
+      columns: columns.map(item => ({
+        ...item,
+        sortable: false
+      })),
+      data: []
+    });
+    await Vue.nextTick();
+    expect(wrapper.findComponent(Pagination).exists()).toBeFalsy();
+    expect(wrapper.findComponent(TableHeaderCell).find('.' + SORTABLE_CLASS).exists()).toBeFalsy();
+    expect(wrapper.findAllComponents(TableBodyCell).length).toEqual(0);
   });
 
 })
